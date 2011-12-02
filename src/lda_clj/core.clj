@@ -1,29 +1,21 @@
 (ns lda_clj.core)
 
-(defstruct document :w :z :Nz)
-(def w [1 2 3 4 5])
+(defn get-word-id [vec]
+  (let [word2id-map (first vec)
+	word (second vec)
+	word-id (get word2id-map word)
+	new-word-id (count word2id-map)]
+    (if word-id
+      [word2id-map word-id]
+      [(assoc word2id-map word new-word-id) new-word-id])))
 
-(def z (loop [z [] x (count w)] ;; init condition for loop
-	(if (zero? x)
-	  z
-	  (recur (conj z x) (dec x)))))
+(defn get-words-ids [word2id-map words]
+  (second (reduce (fn [result word]
+		    (let [word2id-map (first result)
+			  words-ids (second result)
+			  tmp-result (get-word-id [word2id-map word])
+			  word2id-map (first tmp-result)
+			  new-word-id (second tmp-result)]
+		      [(first tmp-result) (conj words-ids new-word-id)]))
+		  [word2id-map []] words)))
 
-(struct document w z (frequencies z))
-
-(def word2id-map (atom {}))
-(defn get-word-id! [word]
-  (if (get @word2id-map word)
-    (get @word2id-map word)
-    (do
-      (swap! word2id-map assoc word
-	     (count @word2id-map))
-      (get @word2id-map word))))
-
-(def wsj-filename "/Users/yasuhisa/nCRP/wsj.txt")
-(use '[clojure.contrib.duck-streams])
-
-(def corpos (let [wsj-filename "/Users/yasuhisa/nCRP/wsj.txt"
-		  lines (line-seq (reader wsj-filename))
-		  lines (for [line lines]
-			  (map #(get-word-id! %) line))]
-	      lines))
