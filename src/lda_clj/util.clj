@@ -1,4 +1,5 @@
 (ns lda_clj.util)
+(def K (atom 3))
 
 (defn logsumexp [x y flg]
   (if flg
