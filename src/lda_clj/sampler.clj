@@ -2,6 +2,16 @@
   (:use [lda_clj.document])
   (:use [lda_clj.corpora]))
 
+(defn dec-topic-in-document [doc idx]
+  (let [w (doc :w)
+	z (doc :z)
+	Nz (doc :Nz)
+	current-topic-id (z idx)]
+    (struct document
+	    w
+	    (assoc z idx nil)
+	    (assoc Nz current-topic-id (dec (Nz current-topic-id))))))
+
 (defn gen-likelihood-prob [corpora word-id topic-id beta]
   (let [Nz ((corpora :Nz) topic-id)
 	Nzw (((corpora :Nzw) topic-id) word-id)
