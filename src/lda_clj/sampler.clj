@@ -12,6 +12,15 @@
 	    (assoc z idx nil)
 	    (assoc Nz current-topic-id (dec (Nz current-topic-id))))))
 
+(defn inc-topic-in-document [doc idx new-topic-id]
+  (let [w (doc :w)
+	z (doc :z)
+	Nz (doc :Nz)]
+    (struct document
+	    w
+	    (assoc z idx new-topic-id)
+	    (assoc Nz new-topic-id (inc (Nz new-topic-id))))))
+
 (defn gen-likelihood-prob [corpora word-id topic-id beta]
   (let [Nz ((corpora :Nz) topic-id)
 	Nzw (((corpora :Nzw) topic-id) word-id)

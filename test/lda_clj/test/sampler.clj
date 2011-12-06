@@ -16,6 +16,18 @@
 	]
     (is (= d-after (dec-topic-in-document d-before 1)))))
 
+(deftest test-inc-topic-in-document
+  (let [d-before (struct document
+		  [1 1 1 1 1]
+		  [0 nil 0 1 1]
+		  [2 2 0])
+	d-after (struct document
+		  [1 1 1 1 1]
+		  [0 0 0 1 1]
+		  [3 2 0])
+	]
+    (is (= d-after (inc-topic-in-document d-before 1 0)))))
+
 (deftest test-gen-prior-prob
   (let [topic-dimension 3
 	alpha 0.1
