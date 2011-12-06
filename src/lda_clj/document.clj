@@ -16,6 +16,17 @@
 		    (vec (repeat @K 0)) z)
 	    )))
 
+(defn valid-document? [document]
+  (letfn [(length-equal? []
+			 (= (count (document :w)) (count (document :z))))
+	  (valid-topic-num? [topic-id]
+			    (= ((document :Nz) topic-id)
+			       (count (filter #(= topic-id %) (document :z)))))
+	  ]
+    (and 
+     (every? #(and true %) (map #(valid-topic-num? %) (range (count (document :Nz))))) ;; all-topic-num-valid?
+     (length-equal?))))
+
 ;; (create-document-with-random-topic-assignments [1 2 3])
 
 ;; (def wsj-filename "/Users/yasuhisa/nCRP/wsj.txt")
