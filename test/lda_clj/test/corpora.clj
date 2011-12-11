@@ -1,20 +1,24 @@
 (ns lda_clj.test.corpora
   (:use [lda_clj.log_likelihood])
   (:use [lda_clj.corpora])
+  (:use [lda_clj.util])
+  (:use [lda_clj.sampler])
   (:use [clojure.test]))
+
+(reset! K 3)
 
 (deftest test-create-corpora
 	 (is (= {:documents [{:w '[0 1 2]
-			      :z '(nil nil nil)
-			      :Nz '(nil nil nil)}
+			      :z '[nil nil nil]
+			      :Nz '[0 0 0]}
 			     {:w '[1 1 4]
-			      :z '(nil nil nil)
-			      :Nz '(nil nil nil)}]
-		   :Nz '(nil nil nil)
-		   :Nzw '((nil nil nil nil nil)
-			  (nil nil nil nil nil)
-			  (nil nil nil nil nil))
-		   :V 5}
+			      :z '[nil nil nil]
+			      :Nz '[0 0 0]}]
+		   :Nz '[0 0 0]
+		   :Nzw '[[0 0 0 0 0]
+			  [0 0 0 0 0]
+			  [0 0 0 0 0]]
+		 :V 5}
 		(create-corpora [[0 1 2]
 				 [1 1 4]]
 				5))))

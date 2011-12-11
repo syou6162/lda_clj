@@ -1,6 +1,5 @@
 (ns lda_clj.test.log_likelihood
   (:use [lda_clj.log_likelihood])
-  (:use [lda_clj.core])
   (:use [lda_clj.util])
   (:use [lda_clj.corpora])
   (:use [lda_clj.document])

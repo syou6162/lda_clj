@@ -28,6 +28,64 @@
 	]
     (is (= d-after (inc-topic-in-document d-before 1 0)))))
 
+(deftest test-dec-topic-in-corpora
+  (let [d0 (struct document
+		   [0 1 2]
+		   [0 0 0]
+		   [3 0 0])
+	d1-before (struct document
+			  [1 2 0]
+			  [0 1 2]
+			  [1 1 1])
+	d1-after (struct document
+			 [1 2 0]
+			 [0 nil 2]
+			 [1 0 1])
+	d2 (struct document
+		   [2 0 1]
+		   [2 2 2]
+		   [0 0 3])
+	corpora-before (struct corpora
+			       [d0 d1-before d2]
+			       [4 1 4]
+			       [[1 2 1] [0 0 1] [2 1 1]]
+			       3)
+	corpora-after (struct corpora
+			      [d0 d1-after d2]
+			      [4 0 4]
+			      [[1 2 1] [0 0 0] [2 1 1]]
+			      3)]
+    (is (= corpora-after (dec-topic-in-corpora corpora-before 1 1)))))
+
+(deftest test-inc-topic-in-corpora
+  (let [d0 (struct document
+		   [0 1 2]
+		   [0 0 0]
+		   [3 0 0])
+	d1-before (struct document
+			  [1 2 0]
+			  [0 nil 2]
+			  [1 0 1])
+	d1-after (struct document
+			 [1 2 0]
+			 [0 1 2]
+			 [1 1 1])
+	d2 (struct document
+		   [2 0 1]
+		   [2 2 2]
+		   [0 0 3])
+	corpora-before (struct corpora
+			       [d0 d1-before d2]
+			       [4 0 4]
+			       [[1 2 1] [0 0 0] [2 1 1]]
+			       3)
+	corpora-after (struct corpora
+			      [d0 d1-after d2]
+			      [4 1 4]
+			      [[1 2 1] [0 0 1] [2 1 1]]
+			      3)]
+    (is (= corpora-after (inc-topic-in-corpora corpora-before 1 1 1)))))
+
 (deftest test-gen-prior-prob
   (let [topic-dimension 3
 	alpha 0.1
@@ -35,14 +93,14 @@
 			      [1 1 1 1 1]
 			      [0 0 0 1 1]
 			      [3 2 0])]
-  (is (> 0.001 (Math/abs (- (/ (+ 3 0.1) (+ 5 (* 3 0.1))) ;; (3 + 0.1) / (5 + 3 * 0.1)
+  (is (> 0.001 (Math/abs (- (+ 3 0.1) ;; 3 + 0.1
 			    (gen-prior-prob test-document 0 topic-dimension alpha)))))
-  (is (> 0.001 (Math/abs (- (/ (+ 2 0.1) (+ 5 (* 3 0.1))) ;; (2 + 0.1) / (5 + 3 * 0.1)
+  (is (> 0.001 (Math/abs (- (+ 2 0.1) ;; 2 + 0.1
 			    (gen-prior-prob test-document 1 topic-dimension alpha)))))
-  (is (> 0.001 (Math/abs (- (/ (+ 0 0.1) (+ 5 (* 3 0.1))) ;; log(0 + 0.1) - log(5 + 3 * 0.1)
+  (is (> 0.001 (Math/abs (- (+ 0 0.1) ;; 0 + 0.1
 			    (gen-prior-prob test-document 2 topic-dimension alpha)))))
   ;; sum to 1
-  (is (> 0.001 (Math/abs (- 1.0
+  (is (> 0.001 (Math/abs (- (+ (count (test-document :w)) (* alpha topic-dimension))
 			    (reduce + (for [topic-id (range 3)]
 					(gen-prior-prob test-document topic-id topic-dimension alpha)))))))))
 

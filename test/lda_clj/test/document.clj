@@ -1,9 +1,10 @@
 (ns lda_clj.test.document
   (:use [lda_clj.document])
+  (:use [lda_clj.util])
   (:use [clojure.test]))
 
 (deftest test-create-document
-  (is (= {:w '[1 2 3 4 2], :z '(nil nil nil nil nil), :Nz '(nil nil nil)}
+  (is (= {:w '[1 2 3 4 2], :z '[nil nil nil nil nil], :Nz '[0 0 0]}
 	 (create-document '[1 2 3 4 2]))))
 
 (deftest test-valid-document?
