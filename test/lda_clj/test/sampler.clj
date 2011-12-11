@@ -91,8 +91,8 @@
 	alpha 0.1
 	test-document (struct document
 			      [1 1 1 1 1]
-			      [0 0 0 1 1]
-			      [3 2 0])]
+			      (atom [0 0 0 1 1])
+			      (atom [3 2 0]))]
   (is (> 0.001 (Math/abs (- (+ 3 0.1) ;; 3 + 0.1
 			    (gen-prior-prob test-document 0 topic-dimension alpha)))))
   (is (> 0.001 (Math/abs (- (+ 2 0.1) ;; 2 + 0.1
@@ -107,20 +107,20 @@
 (deftest test-gen-likelihood-prob
   (let [d0 (struct document
 		   [0 1 2]
-		   [0 0 0]
-		   [3 0 0])
+		   (atom [0 0 0])
+		   (atom [3 0 0]))
 	d1 (struct document
 		   [1 2 0]
-		   [0 1 2]
-		   [1 1 1])
+		   (atom [0 1 2])
+		   (atom [1 1 1]))
 	d2 (struct document
 		   [2 0 1]
-		   [2 2 2]
-		   [0 0 3])
+		   (atom [2 2 2])
+		   (atom [0 0 3]))
 	corpora	(struct corpora
 			[d0 d1 d2]
-			[4 1 4]
-			[[1 2 1] [0 0 1] [2 1 1]]
+			(atom [4 1 4])
+			[(atom [1 2 1]) (atom [0 0 1]) (atom [2 1 1])]
 			3)
 	beta 0.1]
     ;; gen-likelihood-prob [corpora word-id topic-id beta]

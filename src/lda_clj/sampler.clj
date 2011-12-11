@@ -55,12 +55,12 @@
 	    V)))
 
 (defn ^Double gen-likelihood-prob [corpora ^Integer word-id ^Integer topic-id ^Double beta]
-  (let [^Integer Nz ((corpora :Nz) topic-id)
-	^Integer Nzw (((corpora :Nzw) topic-id) word-id)
+  (let [^Integer Nz ((deref (corpora :Nz)) topic-id)
+	^Integer Nzw ((deref ((corpora :Nzw) topic-id)) word-id)
 	^Integer V (corpora :V)]
     (/ (+ Nzw beta) (+ Nz (* beta V)))))
 
 (defn ^Double gen-prior-prob [document ^Integer topic-id ^Integer K ^Double alpha]
-  (let [^Integer Nz ((document :Nz) topic-id)]
+  (let [^Integer Nz ((deref (document :Nz)) topic-id)]
     ;; 分母は定数なので割らない。比率だけ分かればよい
     (+ Nz alpha)))

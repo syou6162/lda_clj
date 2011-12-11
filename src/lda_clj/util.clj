@@ -13,8 +13,8 @@
     y
     (if (= x y)
       (+ x 0.69314718055) ;; log(2)
-      (let [vmin (min x y)
-	    vmax (max x y)]
+      (let [^Double vmin (min x y)
+	    ^Double vmax (max x y)]
 	(if (> vmax (+ vmin 50))
 	  vmax
 	  (+ vmax (Math/log (+ (Math/exp (- vmin vmax)) 1.0))))))))
@@ -32,11 +32,11 @@
 (defn ^Integer sample [^doubles unscaled-prop]
   (let [r (. my-mt nextDouble) ; (rand)
 	[posts-tmp psum] (calc-posts-vectors-and-psum unscaled-prop)
-	posts (assoc posts-tmp 0 (Math/exp (- (posts-tmp 0) psum)))]
+	^doubles posts (assoc posts-tmp 0 (Math/exp (- (posts-tmp 0) psum)))]
     (if (<= r (posts 0))
       0
       (loop [^Integer idx 1
-	     posts (decode-logsumexp psum posts idx)]
+	     ^doubles posts (decode-logsumexp psum posts idx)]
 	(if (= idx (count posts))
 	  (dec idx) ;; 末尾
 	  (if (<= r (posts idx))
