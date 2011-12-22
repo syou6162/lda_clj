@@ -19,9 +19,9 @@
   (let [V (corpora :V)]
     (+ (- (* @K (logGamma (* @beta V)))
 	  (* (* @K V) (logGamma @beta)))
-     (reduce + (for [z (range @K)]
+       (reduce + (for [z (range @K)]
 		 (- (reduce + (for [v (range V)]
-				(logGamma (+ (((corpora :Nzw) z) v) @beta))))
+				(logGamma (+ (((corpora :Nwz) v) z) @beta))))
 		    (logGamma (+ ((corpora :Nz) z) (* @beta V)))))))))
 
 (defn ^Double log-likelihood [corpora]

@@ -29,5 +29,6 @@
 			       (count (filter #(= topic-id %) (document :z)))))
 	  ]
     (and 
-     (every? #(and true %) (map #(valid-topic-num? %) (range (count (document :Nz))))) ;; all-topic-num-valid?
+     (->> (map #(valid-topic-num? %) (range (count (document :Nz))))
+	  (every? #(and true %))) ;; all-topic-num-valid?
      (length-equal?))))
