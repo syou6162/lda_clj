@@ -101,15 +101,12 @@
 
 ; (for [_ (range 30)] (my-sample (double-array '(0.1 0.3 0.6))))
 
-(defmacro set-new-stat [word-idx word-id z Ndz Nz Nzw f]
+(defmacro set-new-stat [word-idx word-id z Ndz Nz Nwz f]
   `(do
      (swap! ~'z-atom assoc ~word-idx ~z)
      (swap! ~'Ndz-atom assoc ~z (~f ~Ndz))
      (swap! ~'Nz-atom assoc ~z (~f ~Nz))
-     (swap! (~'Nzw-atom ~z) assoc ~word-id (~f ~Nzw))))
-
-
-
+     (swap! (~'Nwz-atom ~word-id) assoc ~z (~f ~Nwz))))
 
 ; (println (macroexpand `(set-new-stat 1 2 1 1 9 2 inc)))
 
@@ -140,7 +137,7 @@
 	  corpora (gen-corpora raw-documents)
 	  num-of-docs (count (corpora :documents))
 	  Nz-atom (corpora :Nz)
-	  Nzw-atom (corpora :Nzw)
+	  Nwz-atom (corpora :Nwz)
 	  V (corpora :V)]
       (dotimes [iter @max-iter]
 	(dorun
@@ -158,17 +155,17 @@
 		      (let [topic-id (@z-atom word-idx)
 			    Ndz (@Ndz-atom topic-id)
 			    Nz (@Nz-atom topic-id)
-			    Nzw (@(Nzw-atom topic-id) word-id)]
-			(set-new-stat word-idx word-id topic-id Ndz Nz Nzw dec)))
+			    Nwz (@(Nwz-atom word-id) topic-id)]
+			(set-new-stat word-idx word-id topic-id Ndz Nz Nwz dec)))
 		    (let [
 			  topic-id (my-sample (vec (map #(* (my-gen-prior-prob (@Ndz-atom %) @alpha)
-							  (my-gen-likelihood-prob
-							   (@Nz-atom %)
-							   (@(Nzw-atom %) word-id)
-							   V @beta))
-						      (range @K))))
+							    (my-gen-likelihood-prob
+							     (@Nz-atom %)
+							     (@(Nwz-atom word-id) %)
+							     V @beta))
+							(range @K))))
 			  Ndz (@Ndz-atom topic-id)
 			  Nz (@Nz-atom topic-id)
-			  Nzw (@(Nzw-atom topic-id) word-id)]
-		      (set-new-stat word-idx word-id topic-id Ndz Nz Nzw inc)))))))))
+			  Nwz (@(Nwz-atom word-id) topic-id)]
+		      (set-new-stat word-idx word-id topic-id Ndz Nz Nwz inc)))))))))
 	(println (str iter ", " (log-likelihood (corpora-map deref corpora))))))))
