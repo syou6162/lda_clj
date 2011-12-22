@@ -155,20 +155,20 @@
 		(let [word-id (w-atom word-idx)]
 		  (do
 		    (if (not (= iter 0))
-		      (let [current-topic-id (@z-atom word-idx)
-			    Ndz (@Ndz-atom current-topic-id)
-			    Nz (@Nz-atom current-topic-id)
-			    Nzw (@(Nzw-atom current-topic-id) word-id)]
-			(set-new-stat word-idx word-id current-topic-id Ndz Nz Nzw dec)))
+		      (let [topic-id (@z-atom word-idx)
+			    Ndz (@Ndz-atom topic-id)
+			    Nz (@Nz-atom topic-id)
+			    Nzw (@(Nzw-atom topic-id) word-id)]
+			(set-new-stat word-idx word-id topic-id Ndz Nz Nzw dec)))
 		    (let [
-			  next-z (my-sample (vec (map #(* (my-gen-prior-prob (@Ndz-atom %) @alpha)
+			  topic-id (my-sample (vec (map #(* (my-gen-prior-prob (@Ndz-atom %) @alpha)
 							  (my-gen-likelihood-prob
 							   (@Nz-atom %)
 							   (@(Nzw-atom %) word-id)
 							   V @beta))
 						      (range @K))))
-			  Ndz (@Ndz-atom next-z)
-			  Nz (@Nz-atom next-z)
-			  Nzw (@(Nzw-atom next-z) word-id)]
-		      (set-new-stat word-idx word-id next-z Ndz Nz Nzw inc)))))))))
-	(println (str iter ", " (log-likelihood (corpora-map @corpora))))))))
+			  Ndz (@Ndz-atom topic-id)
+			  Nz (@Nz-atom topic-id)
+			  Nzw (@(Nzw-atom topic-id) word-id)]
+		      (set-new-stat word-idx word-id topic-id Ndz Nz Nzw inc)))))))))
+	(println (str iter ", " (log-likelihood (corpora-map deref corpora))))))))
