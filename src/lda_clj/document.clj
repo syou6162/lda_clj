@@ -5,18 +5,16 @@
 
 (defn create-document [w]
   (struct document (vec w)
-	  (vec (for [idx (range (count w))] (atom nil)))
-	  (vec (for [idx (range @K)] (atom 0)))))
+	  (vec (for [idx (range (count w))] nil))
+	  (vec (for [idx (range @K)] 0))))
 
 (defn create-document-with-random-topic-assignments [w]
-  (let [z (vec (for [idx (range (count w))] (atom (rand-int @K))))
-	freq (->> z
-		  (map deref)
-		  (frequencies))]
+  (let [z (vec (for [idx (range (count w))] (rand-int @K)))
+	freq (frequencies z)]
     (struct document (vec w) z
 	    (vec (for [z (range @K)]
 		   (let [num (freq z)]
-		     (atom (if num num 0))))))))
+		     (if num num 0)))))))
 
 ; (create-document-with-random-topic-assignments '[1 2])
 ; (document-map deref (create-document-with-random-topic-assignments '[[1 2] [3]]))

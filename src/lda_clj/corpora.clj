@@ -8,10 +8,10 @@
   (struct corpora
 	  (vec (for [d documents]
 	    (create-document d)))
-	  (vec (for [idx (range @K)] (atom 0)))
+	  (vec (for [idx (range @K)] 0))
 	  (vec (for [t (range V)] ;; vocabulary loop
 		 (vec (for [v (range @K)] ;; topic loop
-			(atom 0)))))
+			0))))
 	  V))
 
 (defn gen-count-table [seq]
@@ -28,7 +28,7 @@
 	w-z-seq (for [d documents
 		      idx (range (count (d :w)))]
 		  (let [w ((d :w) idx)
-			z @((d :z) idx)]
+			z ((d :z) idx)]
 		    [w z]))
 	z-freq (frequencies (map second w-z-seq))
 	Nwz (let [count-table (gen-count-table w-z-seq)]
@@ -36,12 +36,12 @@
 		     (vec (for [t (range @K)]
 			    (let [cnt (count-table w)
 				  n (if cnt (cnt t) 0)]
-			      (atom (if n n 0))))))))]
+			      (if n n 0)))))))]
     (struct corpora
 	    (vec documents)
 	    (->> (range @K)
 		 (map #(let [cnt (z-freq %)]
-			 (atom (if cnt cnt 0))))
+			 (if cnt cnt 0)))
 		 (vec))
 	    Nwz @K)))
 

@@ -21,6 +21,6 @@
 			[0 0 0]
 			[0 0 0]]
 		 :V 5}
-		(corpora-map deref (create-corpora [[0 1 2]
-						    [1 1 4]]
-						   5)))))
+		(create-corpora [[0 1 2]
+				 [1 1 4]]
+				5))))

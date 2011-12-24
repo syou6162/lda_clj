@@ -4,7 +4,7 @@
   (:use [clojure.test]))
 
 (deftest test-create-document
-  (is (= (document-map deref (create-document '[1 2 3 4 2]))
+  (is (= (create-document '[1 2 3 4 2])
 	 (struct document '[1 2 3 4 2] '[nil nil nil nil nil] '[0 0 0]))))
 
 (deftest test-valid-document?

@@ -20,11 +20,10 @@
 					  (reset! word2id-map new-map)
 					  word-id))))))]
       (let [raw-documents (read-raw-documents wsj-filename)
-	    documents (map #(document-map deref (create-document-with-random-topic-assignments %))
-			   raw-documents)]
+	    documents (map #(create-document-with-random-topic-assignments %) raw-documents)]
 	(is (neg?
 	     (calc-prior-term documents)))
 	(is (neg?
 	     (calc-likelihood-term 
-	      (corpora-map deref (create-corpora-with-random-topic-assignments
-				   raw-documents (count @word2id-map))))))))))
+	      (create-corpora-with-random-topic-assignments
+		raw-documents (count @word2id-map)))))))))
