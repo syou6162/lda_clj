@@ -8,10 +8,10 @@
   (struct corpora
 	  (vec (for [d documents]
 	    (create-document d)))
-	  (atom (vec (for [idx (range @K)] 0)))
+	  (vec (for [idx (range @K)] (atom 0)))
 	  (vec (for [t (range V)] ;; vocabulary loop
-		 (atom (vec (for [v (range @K)] ;; topic loop
-			      0)))))
+		 (vec (for [v (range @K)] ;; topic loop
+			(atom 0)))))
 	  V))
 
 (defn gen-count-table [seq]
@@ -28,25 +28,31 @@
 	w-z-seq (for [d documents
 		      idx (range (count (d :w)))]
 		  (let [w ((d :w) idx)
-			z ((deref (d :z)) idx)]
+			z @((d :z) idx)]
 		    [w z]))
+	z-freq (frequencies (map second w-z-seq))
 	Nwz (let [count-table (gen-count-table w-z-seq)]
 	      (vec (for [w (range V)]
 		     (vec (for [t (range @K)]
-			    (let [n ((count-table w) t)]
-			      (if n n 0)))))))]
+			    (let [cnt (count-table w)
+				  n (if cnt (cnt t) 0)]
+			      (atom (if n n 0))))))))]
     (struct corpora
 	    (vec documents)
-	    (atom (vec (for [v (range V)]
-			 (reduce + (Nwz v)))))
-	    (vec (map #(atom %) Nwz)) @K)))
+	    (->> (range @K)
+		 (map #(let [cnt (z-freq %)]
+			 (atom (if cnt cnt 0))))
+		 (vec))
+	    Nwz @K)))
+
+; (create-corpora-with-random-topic-assignments '[[1 2 2] [1 1 1]] 3)
 
 (defn corpora-map [f corp]
   (let [documents (vec (map (fn [d]
 			      (document-map f d))
 			    (corp :documents)))
-	Nz (f (corp :Nz))
-	Nwz (vec (map (fn [Nz] (f Nz)) (corp :Nwz)))
+	Nz (vec (map f (corp :Nz)))
+	Nwz (vec (map (fn [Nz] (vec (map f Nz))) (corp :Nwz)))
 	V (corp :V)]
     (struct corpora documents Nz Nwz V)))
 

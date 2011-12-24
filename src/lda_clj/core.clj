@@ -9,11 +9,12 @@
 (use '[clojure.contrib.command-line :only (with-command-line)])
 (use '[clojure.contrib.duck-streams :only (reader)])
 (use '[clojure.contrib.string :only (split)])
-; (use '[incanter.stats :only (sample-multinomial)])
+
+; (set! *warn-on-reflection* true)
 
 (def filename (atom "wsj.txt"))
 (def word2id-map (atom {}))
-(def max-iter (atom 1000))
+(def max-iter (atom 100))
 
 (defn gen-raw-documents [filename]
   (doall (map (fn [line]
@@ -40,21 +41,7 @@
                 s))
     s))
 
-;; (defn make-cum-sum [xs]
-;;   (reduce #(let [[v cum] %1
-;; 		 val %2
-;; 		 new-val (+ val cum)]
-;; 	     [(conj v new-val) new-val])
-;; 	  [[] 0.0] xs))
-
-;; (defn my-sample [xs]
-;;   (let [[v cum] (make-cum-sum xs)
-;; 	r (* (rand) cum)]
-;;     (first (first (drop-while #(let [[idx val] %]
-;; 				 (< val r))
-;; 			      (map-indexed vector (vec v)))))))
-
-(defn my-sample [xs]
+(defn ^Integer my-sample [^doubles xs]
   (let [r (* (reduce + xs) (rand))]
     (loop [idx 0, cum 0.0]
       (let [val (+ cum (xs idx))]
@@ -62,56 +49,12 @@
 	  idx
 	  (recur (inc idx) val))))))
 
-;; (defn ^Integer my-sample [^doubles xs]
-;;   (let [^Double r (* (reduce + xs) (rand))]
-;;     (loop [^Integer idx 0
-;; 	   ^Double cum 0.0]
-;;       (let [^Double val (+ cum (xs idx))]
-;; 	(if (> val r)
-;; 	idx
-;; 	(recur (inc idx) val))))))
-
-; (frequencies (for [_ (range 10000)] (my-sample '[0.1 0.3 0.6])))
-; (time (dotimes [_ 500000] (my-sample '[0.1 0.3 0.6])))
-
-; (time (dotimes [_ 500000] (my-sample '(0.1 0.3 0.6))))
-
-;; (defn make-cum-sum [^doubles xs]
-;;   (areduce xs idx ret (object-array '[(double-array (count xs)) 0.0])
-;; 	   #(let [v (aget 0 %1)
-;; 		  cum (aget 1 %1)
-;; 		  val %2
-;; 		  new-val (+ val cum)]
-;; 	      (do 
-	       
-;; 	     [(conj v new-val) new-val]))
-;; 	   ))
-
-
-
-;; (defn ^Integer my-sample [^doubles xs]
-;;   (let [cum (atom 0.0)]
-;;     (letfn [(^doubles make-cum-sum [^doubles xs]
-;; 		      (amap ^doubles xs idx ^doubles _ (reset! cum (+ @cum (aget ^doubles xs idx)))))]
-;;       (let [v (vec (make-cum-sum xs))
-;; 	    r (* (rand) @cum)]
-;; 	(first (first (drop-while #(let [[idx val] %]
-;; 				     (< val r))
-;; 				  (map-indexed vector v))))))))
-
-; (for [_ (range 30)] (my-sample (double-array '(0.1 0.3 0.6))))
-
-(defmacro set-new-stat [word-idx word-id z Ndz Nz Nwz f]
+(defmacro set-new-stat [z Ndz Nz Nwz f]
   `(do
-     (swap! ~'z-atom assoc ~word-idx ~z)
-     (swap! ~'Ndz-atom assoc ~z (~f ~Ndz))
-     (swap! ~'Nz-atom assoc ~z (~f ~Nz))
-     (swap! (~'Nwz-atom ~word-id) assoc ~z (~f ~Nwz))))
-
-; (println (macroexpand `(set-new-stat 1 2 1 1 9 2 inc)))
-
-
-(defmacro sample-z [])
+     (reset! ~'z-atom ~z)
+     (reset! ~'Ndz-atom (~f ~Ndz))
+     (reset! ~'Nz-atom (~f ~Nz))
+     (reset! ~'Nwz-atom (~f ~Nwz))))
 
 (defn -main [& args]
   (do
@@ -136,36 +79,42 @@
     (let [raw-documents (gen-raw-documents @filename)
 	  corpora (gen-corpora raw-documents)
 	  num-of-docs (count (corpora :documents))
-	  Nz-atom (corpora :Nz)
-	  Nwz-atom (corpora :Nwz)
+	  Nz (corpora :Nz)
+	  Nwz (corpora :Nwz)
 	  V (corpora :V)]
       (dotimes [iter @max-iter]
-	(dorun
+	 (dorun
 	 (for [doc-idx (range num-of-docs)]
 	   (let [current-doc ((corpora :documents) doc-idx)
-		 w-atom (current-doc :w)
-		 z-atom (current-doc :z)
-		 Ndz-atom (current-doc :Nz)
+		 w (current-doc :w)
+		 z (current-doc :z)
+		 Ndz (current-doc :Nz)
 		 Nd (count (current-doc :w))]
 	     (dorun
 	      (for [^Integer word-idx (range Nd)]
-		(let [word-id (w-atom word-idx)]
+		(let [word-id (w word-idx)
+		      Nwz (Nwz word-id)]
 		  (do
 		    (if (not (= iter 0))
-		      (let [topic-id (@z-atom word-idx)
-			    Ndz (@Ndz-atom topic-id)
-			    Nz (@Nz-atom topic-id)
-			    Nwz (@(Nwz-atom word-id) topic-id)]
-			(set-new-stat word-idx word-id topic-id Ndz Nz Nwz dec)))
+		      (let [prev-z @(z word-idx)
+			    z-atom (z word-idx)
+			    Ndz-atom (Ndz prev-z)
+			    Nz-atom (Nz prev-z)
+			    Nwz-atom (Nwz prev-z)]
+			(set-new-stat prev-z @Ndz-atom @Nz-atom @Nwz-atom dec)))
 		    (let [
-			  topic-id (my-sample (vec (map #(* (my-gen-prior-prob (@Ndz-atom %) @alpha)
-							    (my-gen-likelihood-prob
-							     (@Nz-atom %)
-							     (@(Nwz-atom word-id) %)
-							     V @beta))
-							(range @K))))
-			  Ndz (@Ndz-atom topic-id)
-			  Nz (@Nz-atom topic-id)
-			  Nwz (@(Nwz-atom word-id) topic-id)]
-		      (set-new-stat word-idx word-id topic-id Ndz Nz Nwz inc)))))))))
-	(println (str iter ", " (log-likelihood (corpora-map deref corpora))))))))
+			  z-atom (z word-idx)
+			  v (vec (map #(* (my-gen-prior-prob @(Ndz %) @alpha)
+					  (my-gen-likelihood-prob
+					   @(Nz %)
+					   @(Nwz %)
+					   V @beta))
+				      (range @K)))
+			  
+			  next-z (sample-with-java (double-array v))
+			  Ndz-atom (Ndz next-z)
+			  Nz-atom (Nz next-z)
+			  Nwz-atom (Nwz next-z)]
+		      (set-new-stat next-z @Ndz-atom @Nz-atom @Nwz-atom inc)))))))))
+	 (println (str iter ", " (log-likelihood (corpora-map deref corpora))))
+	 ))))
