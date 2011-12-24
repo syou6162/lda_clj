@@ -22,6 +22,8 @@
        (map (fn [[w lis]] {w (frequencies lis)}))
        (apply merge)))
 
+; (gen-count-table '[[0 0] [1 2] [2 1]])
+
 (defn create-corpora-with-random-topic-assignments [documents V]
   (let [documents (for [d documents]
 		    (create-document-with-random-topic-assignments d))
@@ -43,7 +45,7 @@
 		 (map #(let [cnt (z-freq %)]
 			 (if cnt cnt 0)))
 		 (vec))
-	    Nwz @K)))
+	    Nwz V)))
 
 ; (create-corpora-with-random-topic-assignments '[[1 2 2] [1 1 1]] 3)
 

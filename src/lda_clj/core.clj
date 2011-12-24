@@ -41,21 +41,6 @@
                 s))
     s))
 
-(defn ^Integer my-sample [^doubles xs]
-  (let [r (* (reduce + xs) (rand))]
-    (loop [idx 0, cum 0.0]
-      (let [val (+ cum (xs idx))]
-	(if (> val r)
-	  idx
-	  (recur (inc idx) val))))))
-
-(defmacro set-new-stat [z Ndz Nz Nwz f]
-  `(do
-     (reset! ~'z-atom ~z)
-     (reset! ~'Ndz-atom (~f ~Ndz))
-     (reset! ~'Nz-atom (~f ~Nz))
-     (reset! ~'Nwz-atom (~f ~Nwz))))
-
 (defn -main [& args]
   (do
     (with-command-line args "comment"
@@ -76,45 +61,11 @@
 	(println "# Alpha:" @alpha)
 	(println "# Beta:" @beta)
 	(println "# K:" @K)))
-    (let [raw-documents (gen-raw-documents @filename)
-	  corpora (gen-corpora raw-documents)
-	  num-of-docs (count (corpora :documents))
-	  Nz (corpora :Nz)
-	  Nwz (corpora :Nwz)
-	  V (corpora :V)]
-      (dotimes [iter @max-iter]
-	 (dorun
-	 (for [doc-idx (range num-of-docs)]
-	   (let [current-doc ((corpora :documents) doc-idx)
-		 w (current-doc :w)
-		 z (current-doc :z)
-		 Ndz (current-doc :Nz)
-		 Nd (count (current-doc :w))]
-	     (dorun
-	      (for [^Integer word-idx (range Nd)]
-		(let [word-id (w word-idx)
-		      Nwz (Nwz word-id)]
-		  (do
-		    (if (not (= iter 0))
-		      (let [prev-z @(z word-idx)
-			    z-atom (z word-idx)
-			    Ndz-atom (Ndz prev-z)
-			    Nz-atom (Nz prev-z)
-			    Nwz-atom (Nwz prev-z)]
-			(set-new-stat prev-z @Ndz-atom @Nz-atom @Nwz-atom dec)))
-		    (let [
-			  z-atom (z word-idx)
-			  v (vec (map #(* (my-gen-prior-prob @(Ndz %) @alpha)
-					  (my-gen-likelihood-prob
-					   @(Nz %)
-					   @(Nwz %)
-					   V @beta))
-				      (range @K)))
-			  
-			  next-z (sample-with-java (double-array v))
-			  Ndz-atom (Ndz next-z)
-			  Nz-atom (Nz next-z)
-			  Nwz-atom (Nwz next-z)]
-		      (set-new-stat next-z @Ndz-atom @Nz-atom @Nwz-atom inc)))))))))
-	 (println (str iter ", " (log-likelihood (corpora-map deref corpora))))
-	 ))))
+    (loop [corp (gen-corpora (gen-raw-documents @filename))
+	   iter 0]
+      (if (= @max-iter iter)
+	corp
+	(do
+	  (if (not (= 0 iter))
+	    (println (str "Iter:" iter ", " (log-likelihood corp))))
+	  (recur (inference corp (= 0 iter)) (inc iter)))))))

@@ -157,7 +157,7 @@
 
 ; (frequencies (map (fn [_] (sample-with-java (double-array '[0.1 0.3 0.6]))) (range 1000)))
 
-(defn- ^Integer my-sample [^doubles xs]
+(defn ^Integer my-sample [^doubles xs]
   (let [r (* (reduce + xs) (rand))]
     (loop [idx 0, cum 0.0]
       (let [val (+ cum (xs idx))]

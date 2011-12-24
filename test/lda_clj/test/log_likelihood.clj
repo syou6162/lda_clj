@@ -2,6 +2,7 @@
   (:use [lda_clj.log_likelihood])
   (:use [lda_clj.util])
   (:use [lda_clj.corpora])
+  (:use [lda_clj.sampler])
   (:use [lda_clj.document])
   (:use [clojure.test]))
 
@@ -27,3 +28,23 @@
 	     (calc-likelihood-term 
 	      (create-corpora-with-random-topic-assignments
 		raw-documents (count @word2id-map)))))))))
+
+
+(def filename "wsj.txt")
+(def word2id-map (atom {}))
+
+(defn gen-raw-documents [filename]
+  (doall (map (fn [line]
+		(doall (map (fn [word]
+			      (let [[new-map word-id] (get-word-id [@word2id-map word])]
+				(do
+				  (reset! word2id-map new-map)
+				  word-id)))
+			    (split #"\s" line))))
+	      (with-open [r (reader filename)]
+		(doall (line-seq r))))))
+
+(let [raw-documents (gen-raw-documents filename)
+      corp (create-corpora-with-random-topic-assignments
+	     raw-documents (count @word2id-map))]
+  (inference corp))
