@@ -10,7 +10,7 @@
     (struct document
 	    w
 	    (assoc z idx nil)
-	    (assoc Nz current-topic-id (dec (Nz current-topic-id))))))
+	    (update-in Nz [current-topic-id] dec))))
 
 (defn inc-topic-in-document [doc ^Integer idx ^Integer new-topic-id]
   (let [w (doc :w)
@@ -19,7 +19,7 @@
     (struct document
 	    w
 	    (assoc z idx new-topic-id)
-	    (assoc Nz new-topic-id (inc (Nz new-topic-id))))))
+	    (update-in Nz [new-topic-id] inc))))
 
 (defn dec-topic-in-corpora [corp ^Integer doc-idx ^Integer word-idx]
   (let [documents (corp :documents)
@@ -28,14 +28,12 @@
 	^Integer V (corp :V)
 	current-doc (documents doc-idx)
 	^Integer current-word-id ((current-doc :w) word-idx)
-	^Integer current-topic-id ((current-doc :z) word-idx)
-	^Integer Nwz-elem ((Nwz current-word-id) current-topic-id)]
+	^Integer current-topic-id ((current-doc :z) word-idx)]
     (struct corpora
- 	    (assoc documents doc-idx
+	    (assoc documents doc-idx
 		   (dec-topic-in-document current-doc word-idx))
-	    (assoc Nz current-topic-id (dec (Nz current-topic-id)))
-	    (assoc Nwz current-word-id
-		   (assoc (Nwz current-word-id) current-topic-id (dec Nwz-elem)))
+	    (update-in Nz [current-topic-id] dec)
+	    (update-in Nwz [current-word-id current-topic-id] dec)
 	    V)))
 
 (defn inc-topic-in-corpora [corp ^Integer doc-idx ^Integer word-idx ^Integer new-topic-id]
@@ -44,14 +42,12 @@
 	Nwz (corp :Nwz)
 	^Integer V (corp :V)
 	current-doc (documents doc-idx)
-	^Integer current-word-id ((current-doc :w) word-idx)
-	^Integer Nwz-elem ((Nwz current-word-id) new-topic-id)]
+	^Integer current-word-id ((current-doc :w) word-idx)]
     (struct corpora
 	    (assoc documents doc-idx
 		   (inc-topic-in-document current-doc word-idx new-topic-id))
-	    (assoc Nz new-topic-id (inc (Nz new-topic-id)))
-	    (assoc Nwz current-word-id
-		   (assoc (Nwz current-word-id) new-topic-id (inc Nwz-elem)))
+	    (update-in Nz [new-topic-id] inc)
+	    (update-in Nwz [current-word-id new-topic-id] inc)
 	    V)))
 
 (defn ^Double gen-likelihood-prob [corpora ^Integer word-id ^Integer topic-id ^Double beta]
