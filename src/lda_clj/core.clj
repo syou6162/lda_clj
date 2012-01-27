@@ -10,9 +10,10 @@
 (use '[clojure.contrib.duck-streams :only (reader)])
 (use '[clojure.contrib.string :only (split)])
 
-; (set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
-(def filename (atom "wsj.txt"))
+; (def filename (atom "wsj.txt"))
+(def filename (atom "tmp.txt"))
 (def word2id-map (atom {}))
 (def max-iter (atom 100))
 
