@@ -10,10 +10,7 @@
 (use '[clojure.contrib.duck-streams :only (reader)])
 (use '[clojure.contrib.string :only (split)])
 
-(set! *warn-on-reflection* true)
-
-; (def filename (atom "wsj.txt"))
-(def filename (atom "tmp.txt"))
+(def filename (atom "wsj.txt"))
 (def word2id-map (atom {}))
 (def max-iter (atom 100))
 
@@ -35,12 +32,6 @@
 (defn gen-corpora [raw-documents]
   (create-corpora ;; create-corpora-with-random-topic-assignments
    raw-documents (count @word2id-map)))
-
-(defn doall-recur [s]
-  (if (seq? s)
-    (doall (map doall-recur
-                s))
-    s))
 
 (defn -main [& args]
   (do
