@@ -10,9 +10,7 @@
 (use '[clojure.contrib.duck-streams :only (reader)])
 (use '[clojure.contrib.string :only (split)])
 
-(def filename (atom "wsj.txt"))
 (def word2id-map (atom {}))
-(def max-iter (atom 100))
 
 (defn gen-raw-documents [filename]
   (doall (map (fn [line]
@@ -40,10 +38,9 @@
        [topic "Number of topic dimension"]
        [a "Hyperparameter for topic prior"]
        [b "Hyperparameter for word prior"]
+       [max-iter "Number of maximum iterations"]
        rest]
       (do
-	(if (not (nil? file))
-	  (reset! filename file))
 	(if (not (nil? topic))
 	  (reset! K (Integer/parseInt topic)))
 	(if (not (nil? a))
@@ -52,12 +49,12 @@
 	  (reset! beta (Double/parseDouble b)))
 	(println "# Alpha:" @alpha)
 	(println "# Beta:" @beta)
-	(println "# K:" @K)))
-    (loop [corp (gen-corpora (gen-raw-documents @filename))
+	(println "# K:" @K))
+    (loop [corp (gen-corpora (gen-raw-documents file))
 	   iter 0]
-      (if (= @max-iter iter)
+      (if (= (Integer/parseInt max-iter) iter)
 	corp
 	(do
 	  (if (not (= 0 iter))
 	    (println (str "Iter:" iter ", " (log-likelihood corp))))
-	  (recur (inference corp (= 0 iter)) (inc iter)))))))
+	  (recur (inference corp (= 0 iter)) (inc iter))))))))
