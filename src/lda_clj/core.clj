@@ -10,51 +10,29 @@
 (use '[clojure.contrib.duck-streams :only (reader)])
 (use '[clojure.contrib.string :only (split)])
 
-(def word2id-map (atom {}))
-
-(defn gen-raw-documents [filename]
-  (doall (map (fn [line]
-		(doall (map (fn [word]
-			      (let [[new-map word-id] (get-word-id [@word2id-map word])]
-				(do
-				  (reset! word2id-map new-map)
-				  word-id)))
-			    (split #"\s" line))))
-	      (with-open [r (reader filename)]
-		(doall (line-seq r))))))
-
-(defn normalize [xs]
-  (let [sum (reduce + xs)]
-    (map #(/ % sum) xs)))
-
-(defn gen-corpora [raw-documents]
-  (create-corpora ;; create-corpora-with-random-topic-assignments
-   raw-documents (count @word2id-map)))
-
 (defn -main [& args]
-  (do
-    (with-command-line args "comment"
-      [[file "File name of training"]
-       [topic "Number of topic dimension"]
-       [a "Hyperparameter for topic prior"]
-       [b "Hyperparameter for word prior"]
-       [max-iter "Number of maximum iterations"]
-       rest]
-      (do
-	(if (not (nil? topic))
-	  (reset! K (Integer/parseInt topic)))
-	(if (not (nil? a))
-	  (reset! alpha (Double/parseDouble a)))
-	(if (not (nil? b))
-	  (reset! beta (Double/parseDouble b)))
-	(println "# Alpha:" @alpha)
-	(println "# Beta:" @beta)
-	(println "# K:" @K))
-    (loop [corp (gen-corpora (gen-raw-documents file))
-	   iter 0]
-      (if (= (Integer/parseInt max-iter) iter)
-	corp
-	(do
-	  (if (not (= 0 iter))
-	    (println (str "Iter:" iter ", " (log-likelihood corp))))
-	  (recur (inference corp (= 0 iter)) (inc iter))))))))
+  (with-command-line args "comment"
+    [[file "File name of training"]
+     [topic "Number of topic dimension"]
+     [alpha "Hyperparameter for topic prior" 0.1]
+     [beta "Hyperparameter for word prior" 0.1]
+     [max-iter "Number of maximum iterations" 10]
+     rest]
+    (do
+      (if (not (nil? topic))
+	(reset! K (Integer/parseInt topic))))
+    (let [raw-docs (read-raw-docs file)
+	  word2id (get-words-ids {} (flatten raw-docs))
+	  docs (for [doc raw-docs] (map (fn [w] (get-in word2id [w])) doc))]
+      (loop [corp (create-corpora docs (count word2id)) ; (create-corpora-with-random-topic-assignments docs (count word2id))
+	     iter 0]
+	(if (= (Integer/parseInt max-iter) iter)
+	  corp
+	  (do
+	    (if (not (= 0 iter))
+	      (println (str "Iter:" iter ", "
+			    (calc-prior-term corp alpha) ", "
+			    (calc-likelihood-term corp beta) ", "
+			    (log-likelihood corp alpha beta))))
+	    (recur (inference corp alpha beta (= 0 iter)) (inc iter)))))))
+  nil)

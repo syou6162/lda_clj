@@ -34,14 +34,11 @@
 	Nwz (let [count-table (gen-count-table w-z-seq)]
 	      (vec (for [w (range V)]
 		     (vec (for [t (range @K)]
-				   (let [cnt (count-table w)
-					 n (if cnt (cnt t) 0)]
-				     n))))))]
+			    (get-in count-table [w t] 0))))))]
     (struct corpora
 	    (vec documents)
 	    (->> (range @K)
-		 (map #(let [cnt (z-freq %)]
-			 (if cnt cnt 0)))
+		 (map (fn [z] (get-in z-freq [z] 0)))
 		 (vec))
 	    Nwz V)))
 

@@ -6,21 +6,16 @@
   (:use [lda_clj.document])
   (:use [clojure.test]))
 
-(use '[clojure.contrib.duck-streams :only (reader)])
-(use '[clojure.contrib.string :only (split)])
-
 (deftest test-log-likelihood
   (let [wsj-filename "./tmp.txt"
-	word2id {}]
-    (letfn [(read-raw-docs [filename]
-				(let [lines (line-seq (reader filename))]
-				  (for [line (map #(split #"\s" %) lines)]
-				    line)))]
-      (let [raw-docs (read-raw-docs wsj-filename)
-	    word2id (get-words-ids {} (flatten raw-docs))
-	    docs (for [doc raw-docs] (map #(get-in word2id %) doc))
-	    corpora (create-corpora-with-random-topic-assignments docs (count word2id))]
-	(is (neg?
-	     (calc-prior-term corpora)))
-	(is (neg?
-	     (calc-likelihood-term corpora)))))))
+	word2id {}
+	alpha 0.1
+	beta 0.1
+	raw-docs (read-raw-docs wsj-filename)
+	word2id (get-words-ids {} (flatten raw-docs))
+	docs (for [doc raw-docs] (map #(get-in word2id %) doc))
+	corpora (create-corpora-with-random-topic-assignments docs (count word2id))]
+    (is (neg?
+	 (calc-prior-term corpora alpha)))
+    (is (neg?
+	 (calc-likelihood-term corpora beta)))))

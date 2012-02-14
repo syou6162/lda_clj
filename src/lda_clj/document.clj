@@ -13,8 +13,7 @@
 	freq (frequencies z)]
     (struct document (vec w) z
 	    (vec (for [z (range @K)]
-		   (let [num (freq z)]
-		     (if num num 0)))))))
+		   (get-in freq [z] 0))))))
 
 ; (create-document-with-random-topic-assignments '[1 2])
 ; (document-map deref (create-document-with-random-topic-assignments '[[1 2] [3]]))
