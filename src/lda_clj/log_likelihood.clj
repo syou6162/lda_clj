@@ -7,8 +7,9 @@
 (use '[clojure.contrib.import-static :only (import-static)])
 (import-static org.apache.commons.math.special.Gamma logGamma)
 
-(defn ^Double calc-prior-term [documents]
-  (let [N (count documents)]
+(defn ^Double calc-prior-term [corpora]
+  (let [documents (corpora :documents)
+	N (count documents)]
     (+ (- (* N (logGamma (* @alpha @K)))
 	  (* (* N @K) (logGamma @alpha)))
        (reduce + (for [d documents]
@@ -21,12 +22,12 @@
     (+ (- (* @K (logGamma (* @beta V)))
 	  (* (* @K V) (logGamma @beta)))
        (reduce + (for [z (range @K)]
-		 (- (reduce + (for [v (range V)]
-				(logGamma (+ (((corpora :Nwz) v) z) @beta))))
-		    (logGamma (+ ((corpora :Nz) z) (* @beta V)))))))))
+		   (- (reduce + (for [v (range V)]
+				  (logGamma (+ (get-in corpora [:Nwz v z]) @beta))))
+		      (logGamma (+ (get-in corpora [:Nz z]) (* @beta V)))))))))
 
 (defn ^Double log-likelihood [corpora]
-  (+ (calc-prior-term (corpora :documents))
+  (+ (calc-prior-term corpora)
      (calc-likelihood-term corpora)))
 
 (defn sample-by-java-util [lis]
@@ -78,17 +79,3 @@
 	 current-corp
 	 (recur (inference-for-word-level current-corp doc-idx init-flag)
 		(inc doc-idx))))))
-
-;; 			lein run --topic 300 -a 10 -b 10  274.95s user 11.68s system 61% cpu 7:43.89 total
-			
-;; 			next-z (-> (loop [topic-id 0, v []]
-;; 				     (if (= topic-id @K)
-;; 				       v
-;; 				       (let [posterior (my-gen-post-prob (Nz topic-id) (Nwz topic-id) V beta
-;; 									 (Ndz topic-id) alpha)]
-;; 					 (recur
-;; 					  (inc topic-id)
-;; 					  (conj v posterior)))))
-;; 				   (double-array)
-;; 				   (my-sample-with-java)) 
-
