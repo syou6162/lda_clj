@@ -7,24 +7,24 @@
 (use '[clojure.contrib.import-static :only (import-static)])
 (import-static org.apache.commons.math.special.Gamma logGamma)
 
-(defn ^Double calc-prior-term [corpora]
+(defn ^Double calc-prior-term [corpora alpha]
   (let [documents (corpora :documents)
 	N (count documents)]
-    (+ (- (* N (logGamma (* @alpha @K)))
-	  (* (* N @K) (logGamma @alpha)))
+    (+ (- (* N (logGamma (* alpha @K)))
+	  (* (* N @K) (logGamma alpha)))
        (reduce + (for [d documents]
 		   (- (reduce + (for [z (range @K)]
-				  (logGamma (+ ((d :Nz) z) @alpha))))
-		      (logGamma (+ (count (d :w)) (* @alpha @K)))))))))
+				  (logGamma (+ ((d :Nz) z) alpha))))
+		      (logGamma (+ (count (d :w)) (* alpha @K)))))))))
 
-(defn ^Double calc-likelihood-term [corpora]
+(defn ^Double calc-likelihood-term [corpora beta]
   (let [V (corpora :V)]
-    (+ (- (* @K (logGamma (* @beta V)))
-	  (* (* @K V) (logGamma @beta)))
+    (+ (- (* @K (logGamma (* beta V)))
+	  (* (* @K V) (logGamma beta)))
        (reduce + (for [z (range @K)]
 		   (- (reduce + (for [v (range V)]
-				  (logGamma (+ (get-in corpora [:Nwz v z]) @beta))))
-		      (logGamma (+ (get-in corpora [:Nz z]) (* @beta V)))))))))
+				  (logGamma (+ (get-in corpora [:Nwz v z]) beta))))
+		      (logGamma (+ (get-in corpora [:Nz z]) (* beta V)))))))))
 
 (defn ^Double log-likelihood [corpora]
   (+ (calc-prior-term corpora)

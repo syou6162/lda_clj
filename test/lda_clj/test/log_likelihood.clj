@@ -16,11 +16,13 @@
 				(let [lines (line-seq (reader filename))]
 				  (for [line (map #(split #"\s" %) lines)]
 				    line)))]
-      (let [raw-docs (read-raw-docs wsj-filename)
+      (let [alpha 0.1
+	    beta 0.1
+	    raw-docs (read-raw-docs wsj-filename)
 	    word2id (get-words-ids {} (flatten raw-docs))
 	    docs (for [doc raw-docs] (map #(get-in word2id %) doc))
 	    corpora (create-corpora-with-random-topic-assignments docs (count word2id))]
 	(is (neg?
-	     (calc-prior-term corpora)))
+	     (calc-prior-term corpora alpha)))
 	(is (neg?
-	     (calc-likelihood-term corpora)))))))
+	     (calc-likelihood-term corpora beta)))))))
