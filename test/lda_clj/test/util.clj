@@ -5,7 +5,7 @@
 (deftest test-sample0
   (let [tmp [2.5 3.0 1.0 2.0 1.5]
 	N 100000
-	samples (for [i (range N)] (sample tmp))
+	samples (for [i (range N)] (my-sample tmp))
 	table (frequencies samples)]
     (map #(is (and (<= 0 %) (< % 5))) samples)
     ;; Chi_square_test with K – 1 degrees of freedom
@@ -19,7 +19,7 @@
 (deftest test-sample1
   (let [tmp [0.2 0.5 0.3]
 	N 100000
-	samples (for [i (range N)] (sample tmp))
+	samples (for [i (range N)] (my-sample tmp))
 	table (frequencies samples)]
     (map #(is (and (<= 0 %) (< % 3))) samples)
     ;; Chi_square_test with K – 1 degrees of freedom
