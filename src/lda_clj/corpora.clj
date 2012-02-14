@@ -22,23 +22,21 @@
        (map (fn [[w lis]] {w (frequencies lis)}))
        (apply merge)))
 
-; (gen-count-table '[[0 0] [1 2] [2 1]])
-
 (defn create-corpora-with-random-topic-assignments [documents V]
-  (let [documents (for [d documents]
-		    (create-document-with-random-topic-assignments d))
-	w-z-seq (for [d documents
-		      idx (range (count (d :w)))]
-		  (let [w ((d :w) idx)
-			z ((d :z) idx)]
-		    [w z]))
+  (let [documents (vec (for [d documents]
+			 (create-document-with-random-topic-assignments d)))
+	w-z-seq (vec (for [d documents
+			   idx (range (count (d :w)))]
+		       (let [w ((d :w) idx)
+			     z ((d :z) idx)]
+			 [w z])))
 	z-freq (frequencies (map second w-z-seq))
 	Nwz (let [count-table (gen-count-table w-z-seq)]
 	      (vec (for [w (range V)]
 		     (vec (for [t (range @K)]
-			    (let [cnt (count-table w)
-				  n (if cnt (cnt t) 0)]
-			      (if n n 0)))))))]
+				   (let [cnt (count-table w)
+					 n (if cnt (cnt t) 0)]
+				     n))))))]
     (struct corpora
 	    (vec documents)
 	    (->> (range @K)
@@ -46,8 +44,6 @@
 			 (if cnt cnt 0)))
 		 (vec))
 	    Nwz V)))
-
-; (create-corpora-with-random-topic-assignments '[[1 2 2] [1 1 1]] 3)
 
 (defn corpora-map [f corp]
   (let [documents (vec (map (fn [d]
@@ -57,10 +53,6 @@
 	Nwz (vec (map (fn [Nz] (vec (map f Nz))) (corp :Nwz)))
 	V (corp :V)]
     (struct corpora documents Nz Nwz V)))
-
-; (create-corpora '[[1 2] [3]] 4)
-;; (create-corpora-with-random-topic-assignments '[[1 2] [3]] 4)
-;; (corpora-map deref (create-corpora-with-random-topic-assignments '[[1 2] [3]] 4))
 
 (defn valid-corpora? [corpora]
   (letfn [(valid-topic-num? [topic-id]
