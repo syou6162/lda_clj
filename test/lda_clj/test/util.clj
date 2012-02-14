@@ -31,20 +31,16 @@
 	   9.488))))
 
 (deftest test-get-word-id-init
-  (is (= [{"aaa" 0} 0] (get-word-id [{} "aaa"]))))
+  (is (= {"aaa" 0} (get-word-id {} "aaa"))))
 
 (deftest test-get-word-id-seq0
-  (is (= [{"aaa" 0 "bbb" 1} 1]
-	   (get-word-id [(first (get-word-id [{} "aaa"])) "bbb"]))))
+  (is (= {"aaa" 0 "bbb" 1}
+	 (get-word-id (get-word-id {} "aaa") "bbb"))))
 
 (deftest test-get-word-id-seq1
-  (is (= [{"aaa" 0 } 0]
-	   (get-word-id [(first (get-word-id [{} "aaa"])) "aaa"]))))
-
-(deftest test-gen-word2id-map
-  (is (= {"a" 0, "b" 1, "c" 2}
-	 (reduce #(first (get-word-id [%1 %2])) {} '("a" "b" "c" "a")))))
+  (is (= {"aaa" 0}
+	 (get-word-id (get-word-id {} "aaa") "aaa"))))
 
 (deftest test-get-words-ids
-  (is (= [0 1 2 0]
-	   (get-words-ids {} ["a" "b" "c" "a"]))))
+  (is (= {"c" 2, "b" 1, "a" 0}
+	 (get-words-ids {} ["a" "b" "c" "a"]))))
