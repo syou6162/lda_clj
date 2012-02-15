@@ -18,13 +18,11 @@
      [beta "Hyperparameter for word prior" 0.1]
      [max-iter "Number of maximum iterations" 10]
      rest]
-    (do
-      (if (not (nil? topic))
-	(reset! K (Integer/parseInt topic))))
     (let [raw-docs (read-raw-docs file)
 	  word2id (get-words-ids {} (flatten raw-docs))
 	  docs (for [doc raw-docs] (map (fn [w] (get-in word2id [w])) doc))]
-      (loop [corp (create-corpora docs (count word2id)) ; (create-corpora-with-random-topic-assignments docs (count word2id))
+      (loop [corp (create-corpora docs (count word2id) (Integer/parseInt topic))
+					; (create-corpora-with-random-topic-assignments docs (count word2id) (Integer/parseInt topic))
 	     iter 0]
 	(if (= (Integer/parseInt max-iter) iter)
 	  corp

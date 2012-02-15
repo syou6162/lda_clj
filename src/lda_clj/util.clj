@@ -3,8 +3,6 @@
 
 (use '[clojure.contrib.import-static :only (import-static)])
 
-(def K (atom 3))
-
 (def my-mt (new org.apache.commons.math.random.MersenneTwister))
 
 (defn ^Integer my-sample [^doubles xs]

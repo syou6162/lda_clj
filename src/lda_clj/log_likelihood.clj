@@ -9,22 +9,24 @@
 
 (defn ^Double calc-prior-term [corp alpha]
   (let [documents (corp :documents)
-	N (count documents)]
-    (+ (- (* N (logGamma (* alpha @K)))
-	  (* (* N @K) (logGamma alpha)))
+	N (count documents)
+	K (corp :K)]
+    (+ (- (* N (logGamma (* alpha K)))
+	  (* (* N K) (logGamma alpha)))
        (reduce + (for [d documents]
-		   (- (reduce + (for [z (range @K)]
+		   (- (reduce + (for [z (range K)]
 				  (logGamma (+ ((d :Nz) z) alpha))))
-		      (logGamma (+ (count (d :w)) (* alpha @K)))))))))
+		      (logGamma (+ (count (d :w)) (* alpha K)))))))))
 
-(defn ^Double calc-likelihood-term [corpora beta]
-  (let [V (corpora :V)]
-    (+ (- (* @K (logGamma (* beta V)))
-	  (* (* @K V) (logGamma beta)))
-       (reduce + (for [z (range @K)]
+(defn ^Double calc-likelihood-term [corp beta]
+  (let [V (corp :V)
+	K (corp :K)]
+    (+ (- (* K (logGamma (* beta V)))
+	  (* (* K V) (logGamma beta)))
+       (reduce + (for [z (range K)]
 		   (- (reduce + (for [v (range V)]
-				  (logGamma (+ (get-in corpora [:Nwz v z]) beta))))
-		      (logGamma (+ (get-in corpora [:Nz z]) (* beta V)))))))))
+				  (logGamma (+ (get-in corp [:Nwz v z]) beta))))
+		      (logGamma (+ (get-in corp [:Nz z]) (* beta V)))))))))
 
 (defn ^Double log-likelihood [corp alpha beta]
   (+ (calc-prior-term corp alpha)
@@ -55,7 +57,7 @@
 			Nz (old-corpora :Nz)
 			Nwz ((old-corpora :Nwz) current-word-id)
 			next-z (-> (loop [topic-id 0, v []]
-				     (if (= topic-id @K)
+				     (if (= topic-id (dec (old-corpora :K)))
 				       v
 				       (let [posterior (my-gen-post-prob (Nz topic-id) (Nwz topic-id) V beta
 									 (Ndz topic-id) alpha)]

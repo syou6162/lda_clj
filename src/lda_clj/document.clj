@@ -3,16 +3,16 @@
 
 (defstruct document :w :z :Nz)
 
-(defn create-document [w]
+(defn create-document [w K]
   (struct document (vec w)
 	  (vec (for [idx (range (count w))] nil))
-	  (vec (for [idx (range @K)] 0))))
+	  (vec (for [idx (range K)] 0))))
 
-(defn create-document-with-random-topic-assignments [w]
-  (let [z (vec (for [idx (range (count w))] (rand-int @K)))
+(defn create-document-with-random-topic-assignments [w K]
+  (let [z (vec (for [idx (range (count w))] (rand-int K)))
 	freq (frequencies z)]
     (struct document (vec w) z
-	    (vec (for [z (range @K)]
+	    (vec (for [z (range K)]
 		   (get-in freq [z] 0))))))
 
 ; (create-document-with-random-topic-assignments '[1 2])
