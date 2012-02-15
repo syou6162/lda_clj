@@ -15,12 +15,6 @@
 	    (vec (for [z (range K)]
 		   (get-in freq [z] 0))))))
 
-; (create-document-with-random-topic-assignments '[1 2])
-; (document-map deref (create-document-with-random-topic-assignments '[[1 2] [3]]))
-
-(defn document-map [f d]
-  (struct document (d :w) (vec (map f (d :z))) (vec (map f (d :Nz)))))
-
 (defn valid-document? [document]
   (letfn [(length-equal? []
 			 (= (count (document :w)) (count (document :z))))

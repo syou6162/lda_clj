@@ -42,15 +42,6 @@
 		 (vec))
 	    Nwz V K)))
 
-(defn corpora-map [f corp]
-  (let [documents (vec (map (fn [d]
-			      (document-map f d))
-			    (corp :documents)))
-	Nz (vec (map f (corp :Nz)))
-	Nwz (vec (map (fn [Nz] (vec (map f Nz))) (corp :Nwz)))
-	V (corp :V)]
-    (struct corpora documents Nz Nwz V)))
-
 (defn valid-corpora? [corp]
   (letfn [(valid-topic-num? [topic-id]
 			    (= ((corp :Nz) topic-id)
