@@ -6,45 +6,17 @@
   (:use [lda_clj.document])
   (:use [clojure.test]))
 
-(use '[clojure.contrib.duck-streams :only (reader)])
-(use '[clojure.contrib.string :only (split)])
-
 (deftest test-log-likelihood
-  (let [wsj-filename "/Users/yasuhisa/nCRP/wsj.txt"
-	word2id-map (atom {})]
-    (letfn [(read-raw-documents [filename]
-				(let [lines (line-seq (reader filename))]
-				  (for [line (map #(split #"\s" %) lines)]
-				    (for [word line]
-				      (let [[new-map word-id] (get-word-id [@word2id-map word])]
-					(do
-					  (reset! word2id-map new-map)
-					  word-id))))))]
-      (let [raw-documents (read-raw-documents wsj-filename)
-	    documents (map #(create-document-with-random-topic-assignments %) raw-documents)]
-	(is (neg?
-	     (calc-prior-term documents)))
-	(is (neg?
-	     (calc-likelihood-term 
-	      (create-corpora-with-random-topic-assignments
-		raw-documents (count @word2id-map)))))))))
-
-
-(def filename "wsj.txt")
-(def word2id-map (atom {}))
-
-(defn gen-raw-documents [filename]
-  (doall (map (fn [line]
-		(doall (map (fn [word]
-			      (let [[new-map word-id] (get-word-id [@word2id-map word])]
-				(do
-				  (reset! word2id-map new-map)
-				  word-id)))
-			    (split #"\s" line))))
-	      (with-open [r (reader filename)]
-		(doall (line-seq r))))))
-
-(let [raw-documents (gen-raw-documents filename)
-      corp (create-corpora-with-random-topic-assignments
-	     raw-documents (count @word2id-map))]
-  (inference corp))
+  (let [wsj-filename "./tmp.txt"
+	word2id {}
+	alpha 0.1
+	beta 0.1
+	raw-docs (read-raw-docs wsj-filename)
+	word2id (get-words-ids {} (flatten raw-docs))
+	docs (for [doc raw-docs] (map #(get-in word2id %) doc))
+	num-of-topic 3
+	corpora (create-corpora-with-random-topic-assignments docs (count word2id) num-of-topic)]
+    (is (neg?
+	 (calc-prior-term corpora alpha)))
+    (is (neg?
+	 (calc-likelihood-term corpora beta)))))

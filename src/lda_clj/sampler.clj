@@ -26,6 +26,7 @@
 	Nz (corp :Nz)
 	Nwz (corp :Nwz)
 	^Integer V (corp :V)
+	^Integer K (corp :K)
 	current-doc (documents doc-idx)
 	^Integer current-word-id ((current-doc :w) word-idx)
 	^Integer current-topic-id ((current-doc :z) word-idx)]
@@ -34,13 +35,14 @@
 		   (dec-topic-in-document current-doc word-idx))
 	    (update-in Nz [current-topic-id] dec)
 	    (update-in Nwz [current-word-id current-topic-id] dec)
-	    V)))
+	    V K)))
 
 (defn inc-topic-in-corpora [corp ^Integer doc-idx ^Integer word-idx ^Integer new-topic-id]
   (let [documents (corp :documents)
 	Nz (corp :Nz)
 	Nwz (corp :Nwz)
 	^Integer V (corp :V)
+	^Integer K (corp :K)
 	current-doc (documents doc-idx)
 	^Integer current-word-id ((current-doc :w) word-idx)]
     (struct corpora
@@ -48,7 +50,7 @@
 		   (inc-topic-in-document current-doc word-idx new-topic-id))
 	    (update-in Nz [new-topic-id] inc)
 	    (update-in Nwz [current-word-id new-topic-id] inc)
-	    V)))
+	    V K)))
 
 (defn ^Double gen-likelihood-prob [corpora ^Integer word-id ^Integer topic-id ^Double beta]
   (let [^Integer Nz ((deref (corpora :Nz)) topic-id)
