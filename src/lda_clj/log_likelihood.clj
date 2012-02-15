@@ -2,9 +2,9 @@
   (:use [lda_clj.corpora])
   (:use [lda_clj.util])
   (:use [lda_clj.sampler])
-  (:use [lda_clj.document]))
+  (:use [lda_clj.document])
+  (:use [clojure.contrib.import-static :only (import-static)]))
 
-(use '[clojure.contrib.import-static :only (import-static)])
 (import-static org.apache.commons.math.special.Gamma logGamma)
 
 (defn ^Double calc-prior-term [corp alpha]

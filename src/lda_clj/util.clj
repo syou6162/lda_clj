@@ -1,7 +1,8 @@
 (ns lda_clj.util
+  (:use [clojure.contrib.import-static :only (import-static)])
+  (:use [clojure.contrib.duck-streams :only (reader read-lines)])
+  (:use [clojure.contrib.string :only (split)])
   (:import (org.apache.commons/math.random.MersenneTwister)))
-
-(use '[clojure.contrib.import-static :only (import-static)])
 
 (def my-mt (new org.apache.commons.math.random.MersenneTwister))
 
@@ -18,9 +19,6 @@
 
 (defn get-words-ids [word2id words]
   (reduce (fn [m w] (get-word-id m w)) word2id words))
-
-(use '[clojure.contrib.duck-streams :only (reader read-lines)])
-(use '[clojure.contrib.string :only (split)])
 
 (defn read-raw-docs [filename]
   (for [line (read-lines filename)]
