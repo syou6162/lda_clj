@@ -2,15 +2,15 @@
   (:use [lda_clj.document])
   (:use [lda_clj.util]))
 
-(defstruct corpora :documents :Nz :Nwz :V :K)
+(defstruct corpora :documents :Nz :Nzw :V :K)
 
 (defn create-corpora [documents V K]
   (struct corpora
 	  (vec (for [d documents]
 		 (create-document d K)))
 	  (vec (for [idx (range K)] 0))
-	  (vec (for [t (range V)] ;; vocabulary loop
-		 (vec (for [v (range K)] ;; topic loop
+	  (vec (for [v (range K)] ;; topic loop
+		 (vec (for [z (range V)] ;; vocabulary loop
 			0))))
 	  V K))
 
@@ -25,16 +25,16 @@
 (defn create-corpora-with-random-topic-assignments [documents V K]
   (let [documents (vec (for [d documents]
 			 (create-document-with-random-topic-assignments d K)))
-	w-z-seq (vec (for [d documents
+	z-w-seq (vec (for [d documents
 			   idx (range (count (d :w)))]
 		       (let [w ((d :w) idx)
 			     z ((d :z) idx)]
-			 [w z])))
-	z-freq (frequencies (map second w-z-seq))
-	Nwz (let [count-table (gen-count-table w-z-seq)]
-	      (vec (for [w (range V)]
-		     (vec (for [t (range K)]
-			    (get-in count-table [w t] 0))))))]
+			 [z w])))
+	z-freq (frequencies (map first z-w-seq))
+	Nwz (let [count-table (gen-count-table z-w-seq)]
+	      (vec (for [t (range K)]
+		     (vec (for [v (range V)]
+			    (get-in count-table [t v] 0))))))]
     (struct corpora
 	    (vec documents)
 	    (->> (range K)
