@@ -25,7 +25,7 @@
 	  (* (* K V) (logGamma beta)))
        (reduce + (for [z (range K)]
 		   (- (reduce + (for [v (range V)]
-				  (logGamma (+ (get-in corp [:Nwz v z]) beta))))
+				  (logGamma (+ (get-in corp [:Nzw z v]) beta))))
 		      (logGamma (+ (get-in corp [:Nz z]) (* beta V)))))))))
 
 (defn ^Double log-likelihood [corp alpha beta]
@@ -55,11 +55,12 @@
 			current-word-id ((current-doc :w) word-idx)
 			Ndz (current-doc :Nz)
 			Nz (old-corpora :Nz)
-			Nwz ((old-corpora :Nwz) current-word-id)
 			next-z (-> (loop [topic-id 0, v []]
 				     (if (= topic-id (dec (old-corpora :K)))
 				       v
-				       (let [posterior (my-gen-post-prob (Nz topic-id) (Nwz topic-id) V beta
+				       (let [posterior (my-gen-post-prob (Nz topic-id)
+									 (get-in old-corpora [:Nzw topic-id current-word-id])
+									 V beta
 									 (Ndz topic-id) alpha)]
 					 (recur
 					  (inc topic-id)

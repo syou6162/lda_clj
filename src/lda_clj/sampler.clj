@@ -24,7 +24,7 @@
 (defn dec-topic-in-corpora [corp ^Integer doc-idx ^Integer word-idx]
   (let [documents (corp :documents)
 	Nz (corp :Nz)
-	Nwz (corp :Nwz)
+	Nzw (corp :Nzw)
 	^Integer V (corp :V)
 	^Integer K (corp :K)
 	current-doc (documents doc-idx)
@@ -34,13 +34,13 @@
 	    (assoc documents doc-idx
 		   (dec-topic-in-document current-doc word-idx))
 	    (update-in Nz [current-topic-id] dec)
-	    (update-in Nwz [current-word-id current-topic-id] dec)
+	    (update-in Nzw [current-topic-id current-word-id ] dec)
 	    V K)))
 
 (defn inc-topic-in-corpora [corp ^Integer doc-idx ^Integer word-idx ^Integer new-topic-id]
   (let [documents (corp :documents)
 	Nz (corp :Nz)
-	Nwz (corp :Nwz)
+	Nzw (corp :Nzw)
 	^Integer V (corp :V)
 	^Integer K (corp :K)
 	current-doc (documents doc-idx)
@@ -49,19 +49,8 @@
 	    (assoc documents doc-idx
 		   (inc-topic-in-document current-doc word-idx new-topic-id))
 	    (update-in Nz [new-topic-id] inc)
-	    (update-in Nwz [current-word-id new-topic-id] inc)
+	    (update-in Nzw [new-topic-id current-word-id] inc)
 	    V K)))
-
-(defn ^Double gen-likelihood-prob [corpora ^Integer word-id ^Integer topic-id ^Double beta]
-  (let [^Integer Nz ((deref (corpora :Nz)) topic-id)
-	^Integer Nwz ((deref ((corpora :Nwz) word-id)) topic-id)
-	^Integer V (corpora :V)]
-    (/ (+ Nwz beta) (+ Nz (* beta V)))))
-
-(defn ^Double gen-prior-prob [document ^Integer topic-id ^Integer K ^Double alpha]
-  (let [^Integer Nz ((deref (document :Nz)) topic-id)]
-    ;; 分母は定数なので割らない。比率だけ分かればよい
-    (+ Nz alpha)))
 
 (defn ^Double my-gen-likelihood-prob [^Integer Nz ^Integer Nzw ^Integer V ^Double beta]
   (/ (+ Nzw beta) (+ Nz (* beta V))))
