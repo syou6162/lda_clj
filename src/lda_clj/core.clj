@@ -10,6 +10,14 @@
 (use '[clojure.contrib.duck-streams :only (reader)])
 (use '[clojure.contrib.string :only (split)])
 
+(defn get-topic-words [corp id2word topic-id n]
+  (let [Nzw (get-in corp [:Nzw topic-id])]
+    (->> Nzw
+	 (map-indexed (fn [idx cnt] [(id2word idx) cnt]))
+	 (sort-by second >)
+	 (take n)
+	 (map first))))
+
 (defn -main [& args]
   (with-command-line args "comment"
     [[file "File name of training"]
@@ -19,18 +27,23 @@
      [max-iter "Number of maximum iterations" 10]
      rest]
     (let [raw-docs (read-raw-docs file)
-	  word2id (get-words-ids {} (flatten raw-docs))
-	  docs (for [doc raw-docs] (map (fn [w] (get-in word2id [w])) doc))]
-      (loop [corp (create-corpora docs (count word2id) (Integer/parseInt topic))
+	  id2word (vec (set (flatten raw-docs)))
+	  word2id (get-words-ids {} id2word)
+	  docs (for [doc raw-docs] (map (fn [w] (get-in word2id [w])) doc))
+	  K (Integer/parseInt topic)]
+      (loop [corp (create-corpora docs (count word2id) K)
 					; (create-corpora-with-random-topic-assignments docs (count word2id) (Integer/parseInt topic))
 	     iter 0]
 	(if (= (Integer/parseInt max-iter) iter)
 	  corp
 	  (do
 	    (if (not (= 0 iter))
-	      (println (str "Iter:" iter ", "
+	      (do
+		(dotimes [topic-id K]
+		  (println topic-id (get-topic-words corp id2word topic-id 10)))
+		(println (str "Iter:" iter ", "
 			    (calc-prior-term corp alpha) ", "
 			    (calc-likelihood-term corp beta) ", "
-			    (log-likelihood corp alpha beta))))
+			    (log-likelihood corp alpha beta)))))
 	    (recur (inference corp alpha beta (= 0 iter)) (inc iter)))))))
   nil)
