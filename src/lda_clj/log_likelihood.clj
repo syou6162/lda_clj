@@ -58,7 +58,7 @@
 			next-z (-> (loop [topic-id 0, v []]
 				     (if (= topic-id (dec (old-corpora :K)))
 				       v
-				       (let [posterior (my-gen-post-prob (Nz topic-id)
+				       (let [posterior (gen-post-prob (Nz topic-id)
 									 (get-in old-corpora [:Nzw topic-id current-word-id])
 									 V beta
 									 (Ndz topic-id) alpha)]

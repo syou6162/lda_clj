@@ -52,14 +52,14 @@
 	    (update-in Nzw [new-topic-id current-word-id] inc)
 	    V K)))
 
-(defn ^Double my-gen-likelihood-prob [^Integer Nz ^Integer Nzw ^Integer V ^Double beta]
+(defn ^Double gen-likelihood-prob [^Integer Nz ^Integer Nzw ^Integer V ^Double beta]
   (/ (+ Nzw beta) (+ Nz (* beta V))))
 
-(defn ^Double my-gen-prior-prob [^Integer Nz ^Double alpha]
+(defn ^Double gen-prior-prob [^Integer Nz ^Double alpha]
   (+ Nz alpha))
 
-(defn ^Double my-gen-post-prob
+(defn ^Double gen-post-prob
   [^Integer Nz ^Integer Nzw ^Integer V ^Double beta
    ^Integer Ndz ^Double alpha]
-  (* (my-gen-likelihood-prob Nz Nzw V beta)
-     (my-gen-prior-prob Ndz alpha)))
+  (* (gen-likelihood-prob Nz Nzw V beta)
+     (gen-prior-prob Ndz alpha)))
