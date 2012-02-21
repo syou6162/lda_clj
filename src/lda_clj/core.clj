@@ -23,7 +23,7 @@
     [[file "File name of training"]
      [topic "Number of topic dimension"]
      [alpha "Hyperparameter for topic prior" 0.1]
-     [beta "Hyperparameter for word prior" 0.1]
+     [beta "Hyperparameter for word prior" 0.01]
      [max-iter "Number of maximum iterations" 10]
      rest]
     (let [raw-docs (read-raw-docs file)
