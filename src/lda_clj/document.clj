@@ -1,5 +1,5 @@
 (ns lda_clj.document
-  (:use [lda_clj.util]))
+  (:use [lda_clj.random]))
 
 (defstruct document :w :z :Nz)
 
@@ -9,7 +9,7 @@
 	  (vec (for [idx (range K)] 0))))
 
 (defn create-document-with-random-topic-assignments [w K]
-  (let [z (vec (for [idx (range (count w))] (rand-int K)))
+  (let [z (vec (for [idx (range (count w))] (.nextInt *r* K)))
 	freq (frequencies z)]
     (struct document (vec w) z
 	    (vec (for [z (range K)]

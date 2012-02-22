@@ -1,6 +1,5 @@
 (ns lda_clj.corpora
-  (:use [lda_clj.document])
-  (:use [lda_clj.util]))
+  (:use [lda_clj.document]))
 
 (defstruct corpora :documents :Nz :Nzw :V :K)
 

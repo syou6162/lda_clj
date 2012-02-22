@@ -4,12 +4,14 @@
   (:use [lda_clj.document])
   (:use [lda_clj.sampler])
   (:use [lda_clj.log_likelihood])
+  (:use [lda_clj.inference])
   (:use [lda_clj.util])
+  (:use [lda_clj.preprocess])
   (:gen-class))
 
 (import '(java.io FileWriter))
 (use '[clojure.contrib.command-line :only (with-command-line)])
-(use '[clojure.contrib.duck-streams :only (reader)])
+(use '[clojure.contrib.duck-streams :only (reader read-lines)])
 (use '[clojure.contrib.string :only (split)])
 
 (defn get-topic-words [corp id2word topic-id n]
