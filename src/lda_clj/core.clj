@@ -37,7 +37,10 @@
       (loop [corp (create-corpora docs (count word2id) K)
 	     iter 0]
 	(if (= (Integer/parseInt max-iter) iter)
-	  (generate-stream corp
+	  (generate-stream {:corp corp
+			    :alpha alpha
+			    :beta beta
+			    :id2word id2word}
 			   (clojure.java.io/writer model-file))
 	  (do
 	    (if (not (= 0 iter))
