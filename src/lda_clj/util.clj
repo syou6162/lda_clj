@@ -8,13 +8,6 @@
 
 (use '[clojure.contrib.string :only (split)])
 
-(defn ^Integer my-sample [^doubles xs]
-  (let [r (* (reduce + xs) (.nextDouble *r*))]
-    (loop [idx 0, cum 0.0]
-      (let [val (+ cum (xs idx))]
-	(if (>= val r)
-	  idx
-	  (recur (inc idx) val))))))
 
 (defn get-word-id [word2id word]
   (assoc word2id word (get word2id word (count word2id))))
