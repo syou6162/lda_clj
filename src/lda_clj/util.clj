@@ -3,20 +3,10 @@
   (:use [clojure.contrib.duck-streams :only (reader read-lines)])
   (:use [clojure.contrib.string :only (split)])
   (:use [opennlp.nlp])
-(def bin-dir "./model_files")
-(def get-sentences (make-sentence-detector (str bin-dir "/" "en-sent.bin")))
-(def tokenize (make-tokenizer (str bin-dir "/" "en-token.bin")))
-(def pos-tag (make-pos-tagger (str bin-dir "/" "en-pos-maxent.bin")))
-(def permitted-tags #{"NN", "NNS", "NNP", "NNPS"})
+  (:use [lda_clj.preprocess])
   (:use [lda_clj.random]))
 
 (use '[clojure.contrib.string :only (split)])
-(def stop-words (let [result (->> (slurp "/Users/yasuhisa/Dropbox/lda_clj/stop_words")
-                                  (split #"\r\n")
-                                  (set))
-                      additional-stop-words ["+" "-" "(" ")" "." "," "'s" "%" "n't" "'m" "'ve" "'re" "does"]
-                      added (reduce conj result additional-stop-words)]
-		  added))
 
 (defn ^Integer my-sample [^doubles xs]
   (let [r (* (reduce + xs) (.nextDouble *r*))]
