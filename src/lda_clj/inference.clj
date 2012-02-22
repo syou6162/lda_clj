@@ -1,6 +1,7 @@
 (ns lda_clj.inference
   (:use [lda_clj.corpora])
   (:use [lda_clj.util])
+  (:use [lda_clj.random])
   (:use [lda_clj.sampler]))
 
 (defn inference-for-word-level
