@@ -1,4 +1,5 @@
 (ns lda_clj.core
+  (:use [cheshire.core])
   (:use [lda_clj.corpora])
   (:use [lda_clj.document])
   (:use [lda_clj.sampler])
@@ -6,6 +7,7 @@
   (:use [lda_clj.util])
   (:gen-class))
 
+(import '(java.io FileWriter))
 (use '[clojure.contrib.command-line :only (with-command-line)])
 (use '[clojure.contrib.duck-streams :only (reader)])
 (use '[clojure.contrib.string :only (split)])
@@ -25,6 +27,7 @@
      [alpha "Hyperparameter for topic prior" 0.1]
      [beta "Hyperparameter for word prior" 0.01]
      [max-iter "Number of maximum iterations" 10]
+     [model-file "File name of trained model file"]
      rest]
     (let [raw-docs (read-raw-docs file)
 	  id2word (vec (set (flatten raw-docs)))
@@ -32,10 +35,13 @@
 	  docs (for [doc raw-docs] (map (fn [w] (get-in word2id [w])) doc))
 	  K (Integer/parseInt topic)]
       (loop [corp (create-corpora docs (count word2id) K)
-					; (create-corpora-with-random-topic-assignments docs (count word2id) (Integer/parseInt topic))
 	     iter 0]
 	(if (= (Integer/parseInt max-iter) iter)
-	  corp
+	  (generate-stream {:corp corp
+			    :alpha alpha
+			    :beta beta
+			    :id2word id2word}
+			   (clojure.java.io/writer model-file))
 	  (do
 	    (if (not (= 0 iter))
 	      (do
