@@ -4,6 +4,7 @@
   (:use [lda_clj.document])
   (:use [lda_clj.sampler])
   (:use [lda_clj.log_likelihood])
+  (:use [lda_clj.inference])
   (:use [lda_clj.util])
   (:gen-class))
 
