@@ -6,9 +6,10 @@
 (def ^:dynamic *r* (new MersenneTwister *seed*))
 
 (defn ^Integer my-sample [^doubles xs]
-  (let [r (* (reduce + xs) (.nextDouble *r*))]
+  (let [r (* (reduce + xs) (.nextDouble *r*))
+	cnt (count xs)]
     (loop [idx 0, cum 0.0]
       (let [val (+ cum (xs idx))]
-	(if (>= val r)
+	(if (or (>= val r) (= idx (dec cnt)))
 	  idx
 	  (recur (inc idx) val))))))
