@@ -57,7 +57,7 @@
 	       (if (= iter 0) beta (get-new-beta corp beta)))))))
 
 (defn -main [& args]
-  (with-command-line args "comment"
+  (with-command-line args "ex: lein run --max-iter 1000 --file wsj.txt --topic 10 --model-file result.model --alpha 0.1 --beta 0.1"
     [[file "File name of training"]
      [topic "Number of topic dimension"]
      [alpha "Hyperparameter for topic prior"]
