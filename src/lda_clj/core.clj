@@ -34,7 +34,10 @@
 (defn print-stat [corp alpha beta iter id2word]
   (do
     (dotimes [topic-id (corp :K)]
-      (println (str topic-id ": " (get-topic-words corp id2word topic-id 10))))
+      (binding [*out* *err*]
+	(println (str "Iteration: " iter
+		      ", Topic id: " topic-id
+		      ", " (get-topic-words corp id2word topic-id 10)))))
     (println (str "Iter:" iter ", "
 		  (calc-prior-term corp alpha) ", "
 		  (calc-likelihood-term corp beta) ", "
