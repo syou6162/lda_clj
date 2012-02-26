@@ -4,6 +4,7 @@
   (:use [lda_clj.corpora])
   (:use [lda_clj.sampler])
   (:use [lda_clj.document])
+  (:use [lda_clj.lda])
   (:use [clojure.test]))
 
 (deftest test-log-likelihood
