@@ -1,6 +1,7 @@
 (ns lda_clj.util
-  (:use [lda_clj.preprocess])
-  (:use [clojure.contrib.duck-streams :only (reader read-lines)]))
+  (:use [clojure.string :only (split)])
+  (:use [clojure.java.io :only (reader)])
+  (:use [lda_clj.preprocess]))
 
 (defn get-word-id [word2id word]
   (assoc word2id word (get word2id word (count word2id))))
@@ -9,4 +10,4 @@
   (reduce (fn [m w] (get-word-id m w)) word2id words))
 
 (defn read-raw-docs [filename]
-  (for [line (read-lines filename)] (get-bag-of-words line)))
+  (map #(get-bag-of-words %) (split (slurp filename) #"\n")))
