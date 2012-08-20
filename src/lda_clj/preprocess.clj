@@ -1,9 +1,6 @@
 (ns lda_clj.preprocess
-  (:use [clojure.contrib.import-static :only (import-static)])
-  (:use [clojure.contrib.string :only (split)])
-  (:use [clojure.string :only (lower-case)])
-  (:use [opennlp.nlp])
-  (:import (org.apache.commons/math.random.MersenneTwister)))
+  (:use [clojure.string :only (split lower-case)])
+  (:use [opennlp.nlp]))
 
 (def bin-dir "./model_files")
 (def get-sentences (make-sentence-detector (str bin-dir "/" "en-sent.bin")))
@@ -12,9 +9,11 @@
 
 (def ^:dynamic *permitted-tags* #{"NN", "NNS", "NNP", "NNPS"})
 
+(defn flip [f x y] (f y x))
+
 (def ^:dynamic *stop-words*
      (let [result (->> (slurp "./stop_words")
-		       (split #"\r\n")
+		       (flip split #"\r\n")
 		       (set))
 	   additional-stop-words ["+" "-" "(" ")" "." "," "'s" "%" "n't" "'m" "'ve" "'re" "does"]
 	   added (reduce conj result additional-stop-words)]
